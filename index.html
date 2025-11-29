@@ -368,7 +368,7 @@
                           ` : ''}
                           <small>${new Date(level.created_at).toLocaleDateString()} • ${level.download_count}
   downloads</small>
-                          div class="level-actions">
+                          <div class="level-actions">
       <button class="download-btn" onclick="downloadLevel(${level.id}, '${escapeJs(level.title)}')">⬇ Download</button>
       <button class="share-btn" onclick="copyShareLink(${level.id})">🔗 Share</button>
       ${isAdmin ? `<button class="delete-btn" onclick="deleteLevel(${level.id})" style="background:#ff4444;">🗑️
