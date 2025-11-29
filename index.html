@@ -247,18 +247,20 @@
               const errors = [];
 
               if (!data.duck_start_position && !data.duck_start) {
-                  errors.push('Missing duck_start position');
-              } else {
-                  if (typeof data.duck_start.x !== 'number') errors.push('duck_start.x must be a number');
-                  if (typeof data.duck_start.y !== 'number') errors.push('duck_start.y must be a number');
-              }
+      errors.push('Missing duck_start position');
+  } else {
+      const duckStart = data.duck_start_position || data.duck_start;
+      if (typeof duckStart.x !== 'number') errors.push('duck_start.x must be a number');
+      if (typeof duckStart.y !== 'number') errors.push('duck_start.y must be a number');
+  }
 
-              if (!data.goal_position && !data.goal) {
-                  errors.push('Missing goal position');
-              } else {
-                  if (typeof data.goal.x !== 'number') errors.push('goal.x must be a number');
-                  if (typeof data.goal.y !== 'number') errors.push('goal.y must be a number');
-              }
+  if (!data.goal_position && !data.goal) {
+      errors.push('Missing goal position');
+  } else {
+      const goal = data.goal_position || data.goal;
+      if (typeof goal.x !== 'number') errors.push('goal.x must be a number');
+      if (typeof goal.y !== 'number') errors.push('goal.y must be a number');
+  }
 
               return errors;
           }
