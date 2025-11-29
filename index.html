@@ -246,14 +246,14 @@
           function validateLevelData(data) {
               const errors = [];
 
-              if (!data.duck_start) {
+              if (!data.duck_start_position && !data.duck_start) {
                   errors.push('Missing duck_start position');
               } else {
                   if (typeof data.duck_start.x !== 'number') errors.push('duck_start.x must be a number');
                   if (typeof data.duck_start.y !== 'number') errors.push('duck_start.y must be a number');
               }
 
-              if (!data.goal) {
+              if (!data.goal_position && !data.goal) {
                   errors.push('Missing goal position');
               } else {
                   if (typeof data.goal.x !== 'number') errors.push('goal.x must be a number');
