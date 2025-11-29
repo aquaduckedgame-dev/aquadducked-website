@@ -172,62 +172,238 @@
               background: rgba(255,215,0,0.1);
               border: 2px solid #ffd700;
           }
+          /* Tabs */
+  .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #2a4a6a;
+      padding-bottom: 10px;
+  }
+
+  .tab-btn {
+      background: transparent;
+      border: none;
+      color: #88aacc;
+      font-size: 18px;
+      padding: 12px 24px;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      transition: all 0.3s;
+  }
+
+  .tab-btn:hover {
+      background: #1a3a5a;
+      color: white;
+  }
+
+  .tab-btn.active {
+      background: #2a5a8a;
+      color: white;
+  }
+
+  .tab-content {
+      display: none;
+  }
+
+  .tab-content.active {
+      display: block;
+  }
+
+  /* Upload Form */
+  .upload-form {
+      max-width: 500px;
+      margin: 0 auto;
+  }
+
+  .upload-form label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      color: #88aacc;
+  }
+
+  .upload-form input[type="text"],
+  .upload-form input[type="password"],
+  .upload-form input[type="file"],
+  .upload-form select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #2a4a6a;
+      background: #1a2a3a;
+      color: white;
+      font-size: 16px;
+  }
+
+  .upload-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 15px;
+      font-size: 18px;
+      background: #22aa66;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+  }
+
+  .upload-btn:hover {
+      background: #33bb77;
+  }
+
+  /* Admin Panel */
+  .admin-panel {
+      max-width: 400px;
+      margin: 0 auto;
+      text-align: center;
+  }
+
+  .admin-login {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+  }
+
+  .admin-login input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #2a4a6a;
+      background: #1a2a3a;
+      color: white;
+  }
+
+  .admin-login button {
+      padding: 12px 20px;
+      background: #aa4444;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+  }
+
+  .admin-status {
+      padding: 15px;
+      background: #1a2a3a;
+      border-radius: 8px;
+      margin-top: 20px;
+  }
+
+  #adminModeText {
+      font-weight: bold;
+      color: #ff6666;
+  }
+
+  .tag-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+  }
+
+  .tag-checkboxes label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #1a3a5a;
+      padding: 8px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      margin: 0;
+  }
+
+  .file-name {
+      margin-top: 10px;
+      padding: 10px;
+      background: #1a3a5a;
+      border-radius: 8px;
+      display: none;
+  }
+
+  .file-name.visible {
+      display: block;
+  }
+
+  .file-name.error {
+      background: #4a1a1a;
+      color: #ff8888;
+  }
       </style>
   </head>
   <body>
-      <div style="text-align: center; margin-bottom: 20px;">
-          <img src="logo.png" alt="AquaDucked!" style="max-width: 400px; width: 100%;">
-          <h2 style="color: #87ceeb; margin-top: 10px;">Level Portal</h2>
-      </div>
+      <div class="container">
+          <h1>🦆 AquaDucked! Level Portal</h1>
 
-      <div style="margin-bottom: 20px;">
-          <input type="password" id="adminCode" placeholder="Admin code" style="padding: 8px; border-radius: 5px; border: 1px solid #444; background: #1a2a3a; color: white;">
-          <button onclick="toggleAdmin()" style="padding: 8px 16px; margin-left: 10px;">🔐 Admin</button>
-      </div>
+          <!-- Tab Navigation -->
+          <div class="tabs">
+              <button class="tab-btn active" onclick="showTab('browse')">🌊 Browse Levels</button>
+              <button class="tab-btn" onclick="showTab('upload')">📤 Upload Level</button>
+              <button class="tab-btn" onclick="showTab('admin')">🔐 Admin</button>
+          </div>
 
-      <!-- Upload Section -->
-      <div class="upload-section">
-          <h2>Upload a Level</h2>
-          <input type="password" id="uploadCode" class="code-field" placeholder="Upload Code (required)" required>
-          <input type="text" id="title" placeholder="Level Title" required>
-          <input type="text" id="author" placeholder="Your Name" required>
+          <!-- Browse Tab -->
+          <div id="browseTab" class="tab-content active">
+              <div id="levelList">Loading levels...</div>
+          </div>
 
-          <select id="difficulty">
-              <option value="">-- Select Difficulty --</option>
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-              <option value="expert">Expert</option>
-          </select>
+          <!-- Upload Tab -->
+          <div id="uploadTab" class="tab-content">
+              <div class="upload-form">
+                  <h2>Upload a Level</h2>
 
-          <div class="tags-section">
-              <label>Tags (select all that apply)</label>
-              <div class="tag-checkboxes">
-                  <label><input type="checkbox" value="Puzzle"> Puzzle</label>
-                  <label><input type="checkbox" value="Action"> Action</label>
-                  <label><input type="checkbox" value="Precision"> Precision</label>
-                  <label><input type="checkbox" value="Creative"> Creative</label>
-                  <label><input type="checkbox" value="Short"> Short</label>
-                  <label><input type="checkbox" value="Long"> Long</label>
-                  <label><input type="checkbox" value="Water"> Water</label>
-                  <label><input type="checkbox" value="Tricky"> Tricky</label>
+                  <label>Level File (JSON)</label>
+                  <input type="file" id="levelFile" accept=".json" onchange="handleFileSelect(event)">
+                  <div id="fileName" class="file-name"></div>
+
+                  <label>Title</label>
+                  <input type="text" id="title" placeholder="Level title">
+
+                  <label>Author</label>
+                  <input type="text" id="author" placeholder="Your name">
+
+                  <label>Difficulty</label>
+                  <select id="difficulty">
+                      <option value="">Select difficulty...</option>
+                      <option value="easy">Easy</option>
+                      <option value="medium">Medium</option>
+                      <option value="hard">Hard</option>
+                      <option value="expert">Expert</option>
+                  </select>
+
+                  <label>Tags</label>
+                  <div class="tag-checkboxes">
+                      <label><input type="checkbox" value="Puzzle"> Puzzle</label>
+                      <label><input type="checkbox" value="Action"> Action</label>
+                      <label><input type="checkbox" value="Precision"> Precision</label>
+                      <label><input type="checkbox" value="Creative"> Creative</label>
+                      <label><input type="checkbox" value="Short"> Short</label>
+                      <label><input type="checkbox" value="Long"> Long</label>
+                  </div>
+
+                  <label>Upload Code</label>
+                  <input type="password" id="uploadCode" placeholder="Enter upload code">
+
+                  <button class="upload-btn" onclick="uploadLevel()">📤 Upload Level</button>
+                  <div id="uploadMessage"></div>
               </div>
           </div>
 
-          <div class="file-input-wrapper">
-              <label>Select Level File (.json)</label>
-              <input type="file" id="levelFile" accept=".json" onchange="handleFileSelect(event)">
-              <div id="fileName" class="file-name"></div>
+          <!-- Admin Tab -->
+          <div id="adminTab" class="tab-content">
+              <div class="admin-panel">
+                  <h2>Admin Panel</h2>
+                  <p>Enter the admin code to enable level management.</p>
+
+                  <div class="admin-login">
+                      <input type="password" id="adminCode" placeholder="Admin code">
+                      <button onclick="toggleAdmin()">🔓 Toggle Admin Mode</button>
+                  </div>
+
+                  <div id="adminStatus" class="admin-status">
+                      Status: <span id="adminModeText">OFF</span>
+                  </div>
+              </div>
           </div>
-
-          <button onclick="uploadLevel()" id="uploadBtn">Upload Level</button>
-          <div id="uploadMessage"></div>
-      </div>
-
-      <!-- Level List -->
-      <div class="levels-section">
-          <h2>Browse Levels</h2>
-          <div id="levelList">Loading levels...</div>
       </div>
 
       <script>
