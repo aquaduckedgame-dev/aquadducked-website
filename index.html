@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
   <html lang="en">
   <head>
       <meta charset="UTF-8">
@@ -26,7 +26,7 @@
               border-radius: 10px;
               margin-bottom: 30px;
           }
-          input, textarea {
+          input[type="text"], textarea {
               width: 100%;
               padding: 10px;
               margin: 8px 0;
@@ -34,7 +34,34 @@
               border-radius: 5px;
               font-size: 16px;
           }
-          textarea { height: 150px; font-family: monospace; }
+          textarea { height: 100px; font-family: monospace; }
+
+          /* File Input Styling */
+          .file-input-wrapper {
+              margin: 15px 0;
+          }
+          .file-input-wrapper label {
+              display: block;
+              margin-bottom: 8px;
+              color: #87ceeb;
+          }
+          input[type="file"] {
+              width: 100%;
+              padding: 10px;
+              background: rgba(255,255,255,0.9);
+              border-radius: 5px;
+              cursor: pointer;
+          }
+          .file-name {
+              margin-top: 8px;
+              padding: 10px;
+              background: rgba(0,255,0,0.1);
+              border-radius: 5px;
+              color: #90EE90;
+              display: none;
+          }
+          .file-name.visible { display: block; }
+
           button {
               background: #ffd700;
               color: #1a1a2e;
@@ -47,6 +74,7 @@
               margin-top: 10px;
           }
           button:hover { background: #ffed4a; }
+          button:disabled { background: #666; cursor: not-allowed; }
 
           /* Level List */
           .level-card {
@@ -64,7 +92,9 @@
               padding: 8px 16px;
               font-size: 14px;
           }
-          .copy-btn { background: #87ceeb; }
+          .download-btn { background: #4CAF50; color: white; }
+          .download-btn:hover { background: #45a049; }
+          .share-btn { background: #87ceeb; }
 
           /* Messages */
           .message {
@@ -86,8 +116,14 @@
           <input type="text" id="title" placeholder="Level Title" required>
           <input type="text" id="author" placeholder="Your Name" required>
           <textarea id="description" placeholder="Description (optional)"></textarea>
-          <textarea id="levelData" placeholder="Paste your level JSON here..."></textarea>
-          <button onclick="uploadLevel()">Upload Level</button>
+
+          <div class="file-input-wrapper">
+              <label>Select Level File (.json)</label>
+              <input type="file" id="levelFile" accept=".json" onchange="handleFileSelect(event)">
+              <div id="fileName" class="file-name"></div>
+          </div>
+
+          <button onclick="uploadLevel()" id="uploadBtn">Upload Level</button>
           <div id="uploadMessage"></div>
       </div>
 
@@ -105,8 +141,44 @@
           // Initialize Supabase
           const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+          // Store selected file data
+          let selectedLevelData = null;
+
           // Load levels on page load
           document.addEventListener('DOMContentLoaded', loadLevels);
+
+          function handleFileSelect(event) {
+              const file = event.target.files[0];
+              const fileNameDiv = document.getElementById('fileName');
+
+              if (!file) {
+                  selectedLevelData = null;
+                  fileNameDiv.classList.remove('visible');
+                  return;
+              }
+
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                  try {
+                      selectedLevelData = JSON.parse(e.target.result);
+                      fileNameDiv.textContent = '✓ Loaded: ' + file.name;
+                      fileNameDiv.classList.add('visible');
+
+                      // Auto-fill title from filename if empty
+                      const titleInput = document.getElementById('title');
+                      if (!titleInput.value) {
+                          titleInput.value = file.name.replace('.json', '');
+                      }
+                  } catch (err) {
+                      selectedLevelData = null;
+                      fileNameDiv.textContent = '✗ Invalid JSON file';
+                      fileNameDiv.classList.add('visible');
+                      fileNameDiv.style.background = 'rgba(255,0,0,0.1)';
+                      fileNameDiv.style.color = '#ff6b6b';
+                  }
+              };
+              reader.readAsText(file);
+          }
 
           async function loadLevels() {
               const { data, error } = await supabase
@@ -133,8 +205,9 @@
                       <small>By ${escapeHtml(level.author_name)} • ${new Date(level.created_at).toLocaleDateString()} •
   ${level.download_count} downloads</small>
                       <div class="level-actions">
-                          <button onclick="copyLevel(${level.id})">📋 Copy JSON</button>
-                          <button class="copy-btn" onclick="copyShareLink(${level.id})">🔗 Share Link</button>
+                          <button class="download-btn" onclick="downloadLevel(${level.id}, '${escapeHtml(level.title)}')">⬇     
+   Download JSON</button>
+                          <button class="share-btn" onclick="copyShareLink(${level.id})">🔗 Share Link</button>
                       </div>
                   </div>
               `).join('');
@@ -144,21 +217,16 @@
               const title = document.getElementById('title').value.trim();
               const author = document.getElementById('author').value.trim();
               const description = document.getElementById('description').value.trim();
-              const levelDataStr = document.getElementById('levelData').value.trim();
               const messageDiv = document.getElementById('uploadMessage');
 
               // Validation
-              if (!title || !author || !levelDataStr) {
-                  messageDiv.innerHTML = '<p class="message error">Please fill in title, author, and level data.</p>';
+              if (!title || !author) {
+                  messageDiv.innerHTML = '<p class="message error">Please fill in title and author.</p>';
                   return;
               }
 
-              // Parse JSON to validate it
-              let levelData;
-              try {
-                  levelData = JSON.parse(levelDataStr);
-              } catch (e) {
-                  messageDiv.innerHTML = '<p class="message error">Invalid JSON. Please check your level data.</p>';
+              if (!selectedLevelData) {
+                  messageDiv.innerHTML = '<p class="message error">Please select a level JSON file.</p>';
                   return;
               }
 
@@ -169,7 +237,7 @@
                       title: title,
                       author_name: author,
                       description: description,
-                      level_data: levelData
+                      level_data: selectedLevelData
                   }]);
 
               if (error) {
@@ -182,14 +250,16 @@
               // Clear form and reload levels
               document.getElementById('title').value = '';
               document.getElementById('description').value = '';
-              document.getElementById('levelData').value = '';
+              document.getElementById('levelFile').value = '';
+              document.getElementById('fileName').classList.remove('visible');
+              selectedLevelData = null;
               loadLevels();
           }
 
-          async function copyLevel(id) {
+          async function downloadLevel(id, title) {
               const { data, error } = await supabase
                   .from('levels')
-                  .select('level_data')
+                  .select('level_data, download_count')
                   .eq('id', id)
                   .single();
 
@@ -204,9 +274,17 @@
                   .update({ download_count: data.download_count + 1 })
                   .eq('id', id);
 
-              // Copy to clipboard
-              navigator.clipboard.writeText(JSON.stringify(data.level_data, null, 2));
-              alert('Level JSON copied to clipboard!');
+              // Create and download file
+              const blob = new Blob([JSON.stringify(data.level_data, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = title.replace(/[^a-z0-9]/gi, '_') + '.json';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+
               loadLevels(); // Refresh to show updated count
           }
 
