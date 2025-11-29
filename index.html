@@ -12,7 +12,7 @@
               max-width: 800px;
               margin: 0 auto;
               padding: 20px;
-              background: #0d1926;
+              background: #1e2638;
               min-height: 100vh;
               color: #eee;
           }
@@ -26,7 +26,7 @@
               border-radius: 10px;
               margin-bottom: 30px;
           }
-          input[type="text"], input[type="password"], textarea {
+          input[type="text"], input[type="password"], textarea, select {
               width: 100%;
               padding: 10px;
               margin: 8px 0;
@@ -34,13 +34,43 @@
               border-radius: 5px;
               font-size: 16px;
           }
-          textarea { height: 100px; font-family: monospace; }
+          select { background: white; }
+          textarea { height: 80px; font-family: monospace; }
+
+          /* Tags */
+          .tags-section {
+              margin: 15px 0;
+          }
+          .tags-section label {
+              display: block;
+              margin-bottom: 8px;
+              color: #87ceeb;
+          }
+          .tag-checkboxes {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 10px;
+          }
+          .tag-checkboxes label {
+              background: rgba(255,255,255,0.1);
+              padding: 8px 12px;
+              border-radius: 20px;
+              cursor: pointer;
+              transition: background 0.2s;
+          }
+          .tag-checkboxes input[type="checkbox"] {
+              margin-right: 5px;
+          }
+          .tag-checkboxes label:has(input:checked) {
+              background: #87ceeb;
+              color: #1a1a2e;
+          }
 
           /* File Input Styling */
           .file-input-wrapper {
               margin: 15px 0;
           }
-          .file-input-wrapper label {
+          .file-input-wrapper > label {
               display: block;
               margin-bottom: 8px;
               color: #87ceeb;
@@ -88,8 +118,35 @@
               margin-bottom: 15px;
           }
           .level-card h3 { margin: 0 0 10px 0; color: #ffd700; }
-          .level-card p { margin: 5px 0; color: #ccc; }
+          .level-card .meta { color: #ccc; margin: 5px 0; }
           .level-card small { color: #888; }
+          .level-card .difficulty {
+              display: inline-block;
+              padding: 3px 10px;
+              border-radius: 12px;
+              font-size: 12px;
+              font-weight: bold;
+              margin-right: 10px;
+          }
+          .difficulty-easy { background: #4CAF50; color: white; }
+          .difficulty-medium { background: #FF9800; color: white; }
+          .difficulty-hard { background: #f44336; color: white; }
+          .difficulty-expert { background: #9C27B0; color: white; }
+
+          .level-card .tags {
+              margin-top: 8px;
+          }
+          .level-card .tag {
+              display: inline-block;
+              background: rgba(135, 206, 235, 0.3);
+              color: #87ceeb;
+              padding: 3px 10px;
+              border-radius: 12px;
+              font-size: 12px;
+              margin-right: 5px;
+              margin-top: 5px;
+          }
+
           .level-actions { margin-top: 10px; }
           .level-actions button {
               margin-right: 10px;
@@ -129,7 +186,28 @@
           <input type="password" id="uploadCode" class="code-field" placeholder="Upload Code (required)" required>
           <input type="text" id="title" placeholder="Level Title" required>
           <input type="text" id="author" placeholder="Your Name" required>
-          <textarea id="description" placeholder="Description (optional)"></textarea>
+
+          <select id="difficulty">
+              <option value="">-- Select Difficulty --</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+              <option value="expert">Expert</option>
+          </select>
+
+          <div class="tags-section">
+              <label>Tags (select all that apply)</label>
+              <div class="tag-checkboxes">
+                  <label><input type="checkbox" value="Puzzle"> Puzzle</label>
+                  <label><input type="checkbox" value="Action"> Action</label>
+                  <label><input type="checkbox" value="Precision"> Precision</label>
+                  <label><input type="checkbox" value="Creative"> Creative</label>
+                  <label><input type="checkbox" value="Short"> Short</label>
+                  <label><input type="checkbox" value="Long"> Long</label>
+                  <label><input type="checkbox" value="Water"> Water</label>
+                  <label><input type="checkbox" value="Tricky"> Tricky</label>
+              </div>
+          </div>
 
           <div class="file-input-wrapper">
               <label>Select Level File (.json)</label>
@@ -168,7 +246,6 @@
           function validateLevelData(data) {
               const errors = [];
 
-              // Check for required fields
               if (!data.duck_start) {
                   errors.push('Missing duck_start position');
               } else {
@@ -184,6 +261,11 @@
               }
 
               return errors;
+          }
+
+          function getSelectedTags() {
+              const checkboxes = document.querySelectorAll('.tag-checkboxes input[type="checkbox"]:checked');
+              return Array.from(checkboxes).map(cb => cb.value);
           }
 
           function handleFileSelect(event) {
@@ -202,7 +284,6 @@
                   try {
                       const data = JSON.parse(e.target.result);
 
-                      // Validate level structure
                       const validationErrors = validateLevelData(data);
 
                       if (validationErrors.length > 0) {
@@ -213,20 +294,17 @@
                           return;
                       }
 
-                      // Valid level!
                       selectedLevelData = data;
                       fileValidationPassed = true;
                       fileNameDiv.textContent = '✓ Valid level: ' + file.name;
                       fileNameDiv.classList.add('visible');
                       fileNameDiv.classList.remove('error');
 
-                      // Auto-fill title from level_id or filename if empty
                       const titleInput = document.getElementById('title');
                       if (!titleInput.value) {
                           titleInput.value = data.level_id || file.name.replace('.json', '');
                       }
 
-                      // Auto-fill author from level data if available
                       const authorInput = document.getElementById('author');
                       if (!authorInput.value && data.author) {
                           authorInput.value = data.author;
@@ -260,26 +338,41 @@
                   return;
               }
 
-              levelList.innerHTML = data.map(level => `
-                  <div class="level-card">
-                      <h3>${escapeHtml(level.title)}</h3>
-                      <p>${escapeHtml(level.description || 'No description')}</p>
-                      <small>By ${escapeHtml(level.author_name)} • ${new Date(level.created_at).toLocaleDateString()} •
-  ${level.download_count} downloads</small>
-                      <div class="level-actions">
-                          <button class="download-btn" onclick="downloadLevel(${level.id}, '${escapeJs(level.title)}')">⬇       
-  Download JSON</button>
-                          <button class="share-btn" onclick="copyShareLink(${level.id})">🔗 Share Link</button>
+              levelList.innerHTML = data.map(level => {
+                  const difficultyClass = level.difficulty ? `difficulty-${level.difficulty}` : '';
+                  const difficultyLabel = level.difficulty ? level.difficulty.charAt(0).toUpperCase() +
+  level.difficulty.slice(1) : '';
+                  const tags = level.tags ? level.tags.split(',').filter(t => t.trim()) : [];
+
+                  return `
+                      <div class="level-card">
+                          <h3>${escapeHtml(level.title)}</h3>
+                          <div class="meta">
+                              By ${escapeHtml(level.author_name)}
+                              ${difficultyLabel ? `<span class="difficulty ${difficultyClass}">${difficultyLabel}</span>` :     
+  ''}
+                          </div>
+                          ${tags.length > 0 ? `
+                              <div class="tags">
+                                  ${tags.map(tag => `<span class="tag">${escapeHtml(tag.trim())}</span>`).join('')}
+                              </div>
+                          ` : ''}
+                          <small>${new Date(level.created_at).toLocaleDateString()} • ${level.download_count}
+  downloads</small>
+                          <div class="level-actions">
+                              <button class="download-btn" onclick="downloadLevel(${level.id},
+  '${escapeJs(level.title)}')">⬇ Download</button>
+                              <button class="share-btn" onclick="copyShareLink(${level.id})">🔗 Share</button>
+                          </div>
                       </div>
-                  </div>
-              `).join('');
+                  `;
+              }).join('');
           }
 
           async function uploadLevel() {
               const messageDiv = document.getElementById('uploadMessage');
               const uploadCode = document.getElementById('uploadCode').value.trim();
 
-              // Check upload code
               if (uploadCode !== UPLOAD_CODE) {
                   messageDiv.innerHTML = '<p class="message error">Invalid upload code.</p>';
                   return;
@@ -287,9 +380,9 @@
 
               const title = document.getElementById('title').value.trim();
               const author = document.getElementById('author').value.trim();
-              const description = document.getElementById('description').value.trim();
+              const difficulty = document.getElementById('difficulty').value;
+              const tags = getSelectedTags().join(',');
 
-              // Validation
               if (!title || !author) {
                   messageDiv.innerHTML = '<p class="message error">Please fill in title and author.</p>';
                   return;
@@ -300,13 +393,13 @@
                   return;
               }
 
-              // Upload to Supabase
               const { data, error } = await supabase
                   .from('levels')
                   .insert([{
                       title: title,
                       author_name: author,
-                      description: description,
+                      difficulty: difficulty,
+                      tags: tags,
                       level_data: selectedLevelData
                   }]);
 
@@ -317,9 +410,10 @@
 
               messageDiv.innerHTML = '<p class="message success">Level uploaded successfully!</p>';
 
-              // Clear form and reload levels
+              // Clear form
               document.getElementById('title').value = '';
-              document.getElementById('description').value = '';
+              document.getElementById('difficulty').value = '';
+              document.querySelectorAll('.tag-checkboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
               document.getElementById('levelFile').value = '';
               document.getElementById('fileName').classList.remove('visible');
               selectedLevelData = null;
@@ -339,13 +433,11 @@
                   return;
               }
 
-              // Increment download count
               await supabase
                   .from('levels')
                   .update({ download_count: data.download_count + 1 })
                   .eq('id', id);
 
-              // Create and download file
               const blob = new Blob([JSON.stringify(data.level_data, null, 2)], { type: 'application/json' });
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
@@ -356,7 +448,7 @@
               document.body.removeChild(a);
               URL.revokeObjectURL(url);
 
-              loadLevels(); // Refresh to show updated count
+              loadLevels();
           }
 
           function copyShareLink(id) {
@@ -365,14 +457,12 @@
               alert('Share link copied!');
           }
 
-          // Prevent XSS
           function escapeHtml(text) {
               const div = document.createElement('div');
               div.textContent = text;
               return div.innerHTML;
           }
 
-          // Escape for JS strings in onclick
           function escapeJs(text) {
               return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
           }
