@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
   <html lang="en">
   <head>
       <meta charset="UTF-8">
@@ -26,7 +26,7 @@
               border-radius: 10px;
               margin-bottom: 30px;
           }
-          input[type="text"], textarea {
+          input[type="text"], input[type="password"], textarea {
               width: 100%;
               padding: 10px;
               margin: 8px 0;
@@ -61,6 +61,10 @@
               display: none;
           }
           .file-name.visible { display: block; }
+          .file-name.error {
+              background: rgba(255,0,0,0.1);
+              color: #ff6b6b;
+          }
 
           button {
               background: #ffd700;
@@ -105,6 +109,12 @@
           }
           .success { background: #2e7d32; }
           .error { background: #c62828; }
+
+          /* Upload code field */
+          .code-field {
+              background: rgba(255,215,0,0.1);
+              border: 2px solid #ffd700;
+          }
       </style>
   </head>
   <body>
@@ -113,6 +123,7 @@
       <!-- Upload Section -->
       <div class="upload-section">
           <h2>Upload a Level</h2>
+          <input type="password" id="uploadCode" class="code-field" placeholder="Upload Code (required)" required>
           <input type="text" id="title" placeholder="Level Title" required>
           <input type="text" id="author" placeholder="Your Name" required>
           <textarea id="description" placeholder="Description (optional)"></textarea>
@@ -138,14 +149,39 @@
           const SUPABASE_URL = 'https://nobrtuawmmdkympdbdti.supabase.co';
           const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vYnJ0dWF3bW1ka3ltcGRiZHRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzODEzNzMsImV4cCI6MjA3OTk1NzM3M30.ecEYYUtd1X8QCD3pKAYUuj-clrCd7ObX-SQR2vVnRNY';
 
+          // ⚠️ CHANGE THIS TO YOUR SECRET UPLOAD CODE
+          const UPLOAD_CODE = 'ducktals';
+
           // Initialize Supabase
           const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
           // Store selected file data
           let selectedLevelData = null;
+          let fileValidationPassed = false;
 
           // Load levels on page load
           document.addEventListener('DOMContentLoaded', loadLevels);
+
+          function validateLevelData(data) {
+              const errors = [];
+
+              // Check for required fields
+              if (!data.duck_start) {
+                  errors.push('Missing duck_start position');
+              } else {
+                  if (typeof data.duck_start.x !== 'number') errors.push('duck_start.x must be a number');
+                  if (typeof data.duck_start.y !== 'number') errors.push('duck_start.y must be a number');
+              }
+
+              if (!data.goal) {
+                  errors.push('Missing goal position');
+              } else {
+                  if (typeof data.goal.x !== 'number') errors.push('goal.x must be a number');
+                  if (typeof data.goal.y !== 'number') errors.push('goal.y must be a number');
+              }
+
+              return errors;
+          }
 
           function handleFileSelect(event) {
               const file = event.target.files[0];
@@ -153,6 +189,7 @@
 
               if (!file) {
                   selectedLevelData = null;
+                  fileValidationPassed = false;
                   fileNameDiv.classList.remove('visible');
                   return;
               }
@@ -160,21 +197,43 @@
               const reader = new FileReader();
               reader.onload = function(e) {
                   try {
-                      selectedLevelData = JSON.parse(e.target.result);
-                      fileNameDiv.textContent = '✓ Loaded: ' + file.name;
-                      fileNameDiv.classList.add('visible');
+                      const data = JSON.parse(e.target.result);
 
-                      // Auto-fill title from filename if empty
+                      // Validate level structure
+                      const validationErrors = validateLevelData(data);
+
+                      if (validationErrors.length > 0) {
+                          selectedLevelData = null;
+                          fileValidationPassed = false;
+                          fileNameDiv.innerHTML = '✗ Invalid level file:<br>• ' + validationErrors.join('<br>• ');
+                          fileNameDiv.classList.add('visible', 'error');
+                          return;
+                      }
+
+                      // Valid level!
+                      selectedLevelData = data;
+                      fileValidationPassed = true;
+                      fileNameDiv.textContent = '✓ Valid level: ' + file.name;
+                      fileNameDiv.classList.add('visible');
+                      fileNameDiv.classList.remove('error');
+
+                      // Auto-fill title from level_id or filename if empty
                       const titleInput = document.getElementById('title');
                       if (!titleInput.value) {
-                          titleInput.value = file.name.replace('.json', '');
+                          titleInput.value = data.level_id || file.name.replace('.json', '');
                       }
+
+                      // Auto-fill author from level data if available
+                      const authorInput = document.getElementById('author');
+                      if (!authorInput.value && data.author) {
+                          authorInput.value = data.author;
+                      }
+
                   } catch (err) {
                       selectedLevelData = null;
-                      fileNameDiv.textContent = '✗ Invalid JSON file';
-                      fileNameDiv.classList.add('visible');
-                      fileNameDiv.style.background = 'rgba(255,0,0,0.1)';
-                      fileNameDiv.style.color = '#ff6b6b';
+                      fileValidationPassed = false;
+                      fileNameDiv.textContent = '✗ Invalid JSON file: ' + err.message;
+                      fileNameDiv.classList.add('visible', 'error');
                   }
               };
               reader.readAsText(file);
@@ -189,7 +248,7 @@
               const levelList = document.getElementById('levelList');
 
               if (error) {
-                  levelList.innerHTML = '<p class="error">Error loading levels: ' + error.message + '</p>';
+                  levelList.innerHTML = '<p class="message error">Error loading levels: ' + error.message + '</p>';
                   return;
               }
 
@@ -205,8 +264,8 @@
                       <small>By ${escapeHtml(level.author_name)} • ${new Date(level.created_at).toLocaleDateString()} •
   ${level.download_count} downloads</small>
                       <div class="level-actions">
-                          <button class="download-btn" onclick="downloadLevel(${level.id}, '${escapeHtml(level.title)}')">⬇     
-   Download JSON</button>
+                          <button class="download-btn" onclick="downloadLevel(${level.id}, '${escapeJs(level.title)}')">⬇       
+  Download JSON</button>
                           <button class="share-btn" onclick="copyShareLink(${level.id})">🔗 Share Link</button>
                       </div>
                   </div>
@@ -214,10 +273,18 @@
           }
 
           async function uploadLevel() {
+              const messageDiv = document.getElementById('uploadMessage');
+              const uploadCode = document.getElementById('uploadCode').value.trim();
+
+              // Check upload code
+              if (uploadCode !== UPLOAD_CODE) {
+                  messageDiv.innerHTML = '<p class="message error">Invalid upload code.</p>';
+                  return;
+              }
+
               const title = document.getElementById('title').value.trim();
               const author = document.getElementById('author').value.trim();
               const description = document.getElementById('description').value.trim();
-              const messageDiv = document.getElementById('uploadMessage');
 
               // Validation
               if (!title || !author) {
@@ -225,8 +292,8 @@
                   return;
               }
 
-              if (!selectedLevelData) {
-                  messageDiv.innerHTML = '<p class="message error">Please select a level JSON file.</p>';
+              if (!selectedLevelData || !fileValidationPassed) {
+                  messageDiv.innerHTML = '<p class="message error">Please select a valid level JSON file.</p>';
                   return;
               }
 
@@ -253,6 +320,7 @@
               document.getElementById('levelFile').value = '';
               document.getElementById('fileName').classList.remove('visible');
               selectedLevelData = null;
+              fileValidationPassed = false;
               loadLevels();
           }
 
@@ -300,7 +368,11 @@
               div.textContent = text;
               return div.innerHTML;
           }
+
+          // Escape for JS strings in onclick
+          function escapeJs(text) {
+              return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
+          }
       </script>
   </body>
   </html>
-
