@@ -657,13 +657,14 @@
       if (code === ADMIN_CODE) {
           isAdmin = !isAdmin;
           document.getElementById('adminCode').value = '';
-          alert(isAdmin ? 'Admin mode ON' : 'Admin mode OFF');
+          document.getElementById('adminModeText').textContent = isAdmin ? 'ON' : 'OFF';
+          document.getElementById('adminModeText').style.color = isAdmin ? '#66ff66' : '#ff6666';
           loadLevels();
+          showTab('browse');  // Switch to browse tab to see delete buttons
       } else {
           alert('Invalid code');
       }
   }
-
   async function deleteLevel(id) {
       if (!confirm('Delete this level permanently?')) return;
 
@@ -678,6 +679,15 @@
           alert('Level deleted');
           loadLevels();
       }
+  }
+  function showTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+      // Show selected tab
+      document.getElementById(tabName + 'Tab').classList.add('active');
+      event.target.classList.add('active');
   }
       </script>
   </body>
