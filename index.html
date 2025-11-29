@@ -180,6 +180,11 @@
           <h2 style="color: #87ceeb; margin-top: 10px;">Level Portal</h2>
       </div>
 
+      <div style="margin-bottom: 20px;">
+          <input type="password" id="adminCode" placeholder="Admin code" style="padding: 8px; border-radius: 5px; border: 1px solid #444; background: #1a2a3a; color: white;">
+          <button onclick="toggleAdmin()" style="padding: 8px 16px; margin-left: 10px;">🔐 Admin</button>
+      </div>
+
       <!-- Upload Section -->
       <div class="upload-section">
           <h2>Upload a Level</h2>
@@ -239,6 +244,8 @@
           // Store selected file data
           let selectedLevelData = null;
           let fileValidationPassed = false;
+          let isAdmin = false;
+          const ADMIN_CODE = 'ducktalsadmin';
 
           // Load levels on page load
           document.addEventListener('DOMContentLoaded', loadLevels);
@@ -361,11 +368,12 @@
                           ` : ''}
                           <small>${new Date(level.created_at).toLocaleDateString()} • ${level.download_count}
   downloads</small>
-                          <div class="level-actions">
-                              <button class="download-btn" onclick="downloadLevel(${level.id},
-  '${escapeJs(level.title)}')">⬇ Download</button>
-                              <button class="share-btn" onclick="copyShareLink(${level.id})">🔗 Share</button>
-                          </div>
+                          div class="level-actions">
+      <button class="download-btn" onclick="downloadLevel(${level.id}, '${escapeJs(level.title)}')">⬇ Download</button>
+      <button class="share-btn" onclick="copyShareLink(${level.id})">🔗 Share</button>
+      ${isAdmin ? `<button class="delete-btn" onclick="deleteLevel(${level.id})" style="background:#ff4444;">🗑️
+  Delete</button>` : ''}
+  </div>
                       </div>
                   `;
               }).join('');
@@ -468,6 +476,33 @@
           function escapeJs(text) {
               return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
           }
+        function toggleAdmin() {
+      const code = document.getElementById('adminCode').value;
+      if (code === ADMIN_CODE) {
+          isAdmin = !isAdmin;
+          document.getElementById('adminCode').value = '';
+          alert(isAdmin ? 'Admin mode ON' : 'Admin mode OFF');
+          loadLevels();
+      } else {
+          alert('Invalid code');
+      }
+  }
+
+  async function deleteLevel(id) {
+      if (!confirm('Delete this level permanently?')) return;
+
+      const { error } = await supabase
+          .from('levels')
+          .delete()
+          .eq('id', id);
+
+      if (error) {
+          alert('Delete failed: ' + error.message);
+      } else {
+          alert('Level deleted');
+          loadLevels();
+      }
+  }
       </script>
   </body>
   </html>
