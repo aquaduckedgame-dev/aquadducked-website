@@ -114,19 +114,28 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Bubbles - positioned outside hero on left and right */
+        /* Bubbles - fill the gutter space on each side of the content */
         .bubbles-left, .bubbles-right {
             position: fixed;
             top: 0;
             bottom: 0;
-            width: 80px;
+            /* Fill from screen edge to content edge (content is 900px centered) */
+            width: calc(50vw - 470px);
+            min-width: 0;
             pointer-events: none;
             overflow: hidden;
             z-index: 0;
         }
 
-        .bubbles-left { left: 20px; }
-        .bubbles-right { right: 20px; }
+        .bubbles-left { left: 0; }
+        .bubbles-right { right: 0; }
+
+        /* Hide bubbles on smaller screens where there's no gutter */
+        @media (max-width: 1000px) {
+            .bubbles-left, .bubbles-right {
+                display: none;
+            }
+        }
 
         .bubble {
             position: absolute;
@@ -137,19 +146,25 @@
             opacity: 0;
         }
 
-        /* Left side bubbles - bigger sizes */
-        .bubbles-left .bubble:nth-child(1) { left: 10%; width: 24px; height: 24px; animation-duration: 8s; animation-delay: 0s; }
-        .bubbles-left .bubble:nth-child(2) { left: 50%; width: 18px; height: 18px; animation-duration: 10s; animation-delay: 2s; }
-        .bubbles-left .bubble:nth-child(3) { left: 20%; width: 30px; height: 30px; animation-duration: 12s; animation-delay: 4s; }
-        .bubbles-left .bubble:nth-child(4) { left: 60%; width: 14px; height: 14px; animation-duration: 9s; animation-delay: 1s; }
-        .bubbles-left .bubble:nth-child(5) { left: 35%; width: 22px; height: 22px; animation-duration: 11s; animation-delay: 3s; }
+        /* Left side bubbles - spread across the gutter */
+        .bubbles-left .bubble:nth-child(1) { left: 15%; width: 24px; height: 24px; animation-duration: 8s; animation-delay: 0s; }
+        .bubbles-left .bubble:nth-child(2) { left: 55%; width: 18px; height: 18px; animation-duration: 10s; animation-delay: 2s; }
+        .bubbles-left .bubble:nth-child(3) { left: 30%; width: 30px; height: 30px; animation-duration: 12s; animation-delay: 4s; }
+        .bubbles-left .bubble:nth-child(4) { left: 75%; width: 14px; height: 14px; animation-duration: 9s; animation-delay: 1s; }
+        .bubbles-left .bubble:nth-child(5) { left: 45%; width: 22px; height: 22px; animation-duration: 11s; animation-delay: 3s; }
+        .bubbles-left .bubble:nth-child(6) { left: 85%; width: 26px; height: 26px; animation-duration: 9.5s; animation-delay: 5s; }
+        .bubbles-left .bubble:nth-child(7) { left: 10%; width: 16px; height: 16px; animation-duration: 10.5s; animation-delay: 6s; }
+        .bubbles-left .bubble:nth-child(8) { left: 65%; width: 20px; height: 20px; animation-duration: 8.5s; animation-delay: 7s; }
 
-        /* Right side bubbles - bigger sizes */
-        .bubbles-right .bubble:nth-child(1) { left: 10%; width: 20px; height: 20px; animation-duration: 9s; animation-delay: 0.5s; }
+        /* Right side bubbles - spread across the gutter */
+        .bubbles-right .bubble:nth-child(1) { left: 15%; width: 20px; height: 20px; animation-duration: 9s; animation-delay: 0.5s; }
         .bubbles-right .bubble:nth-child(2) { left: 50%; width: 28px; height: 28px; animation-duration: 11s; animation-delay: 2.5s; }
         .bubbles-right .bubble:nth-child(3) { left: 30%; width: 16px; height: 16px; animation-duration: 8s; animation-delay: 4.5s; }
-        .bubbles-right .bubble:nth-child(4) { left: 60%; width: 24px; height: 24px; animation-duration: 10s; animation-delay: 1.5s; }
-        .bubbles-right .bubble:nth-child(5) { left: 20%; width: 20px; height: 20px; animation-duration: 12s; animation-delay: 3.5s; }
+        .bubbles-right .bubble:nth-child(4) { left: 70%; width: 24px; height: 24px; animation-duration: 10s; animation-delay: 1.5s; }
+        .bubbles-right .bubble:nth-child(5) { left: 25%; width: 20px; height: 20px; animation-duration: 12s; animation-delay: 3.5s; }
+        .bubbles-right .bubble:nth-child(6) { left: 80%; width: 22px; height: 22px; animation-duration: 9s; animation-delay: 5.5s; }
+        .bubbles-right .bubble:nth-child(7) { left: 40%; width: 18px; height: 18px; animation-duration: 10s; animation-delay: 6.5s; }
+        .bubbles-right .bubble:nth-child(8) { left: 60%; width: 26px; height: 26px; animation-duration: 11.5s; animation-delay: 7.5s; }
 
         @keyframes rise {
             0% {
@@ -571,8 +586,14 @@
             <div class="bubble"></div>
             <div class="bubble"></div>
             <div class="bubble"></div>
+            <div class="bubble"></div>
+            <div class="bubble"></div>
+            <div class="bubble"></div>
         </div>
         <div class="bubbles-right">
+            <div class="bubble"></div>
+            <div class="bubble"></div>
+            <div class="bubble"></div>
             <div class="bubble"></div>
             <div class="bubble"></div>
             <div class="bubble"></div>
