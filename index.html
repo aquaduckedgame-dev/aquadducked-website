@@ -112,6 +112,59 @@
             margin-bottom: 40px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Bubbles container */
+        .bubbles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -20px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), rgba(100, 180, 255, 0.1));
+            border-radius: 50%;
+            animation: rise linear infinite;
+            opacity: 0;
+        }
+
+        /* Left side bubbles */
+        .bubble:nth-child(1) { left: 5%; width: 12px; height: 12px; animation-duration: 8s; animation-delay: 0s; }
+        .bubble:nth-child(2) { left: 10%; width: 8px; height: 8px; animation-duration: 10s; animation-delay: 2s; }
+        .bubble:nth-child(3) { left: 3%; width: 15px; height: 15px; animation-duration: 12s; animation-delay: 4s; }
+        .bubble:nth-child(4) { left: 8%; width: 6px; height: 6px; animation-duration: 9s; animation-delay: 1s; }
+        .bubble:nth-child(5) { left: 12%; width: 10px; height: 10px; animation-duration: 11s; animation-delay: 3s; }
+
+        /* Right side bubbles */
+        .bubble:nth-child(6) { right: 5%; left: auto; width: 10px; height: 10px; animation-duration: 9s; animation-delay: 0.5s; }
+        .bubble:nth-child(7) { right: 10%; left: auto; width: 14px; height: 14px; animation-duration: 11s; animation-delay: 2.5s; }
+        .bubble:nth-child(8) { right: 3%; left: auto; width: 7px; height: 7px; animation-duration: 8s; animation-delay: 4.5s; }
+        .bubble:nth-child(9) { right: 8%; left: auto; width: 11px; height: 11px; animation-duration: 10s; animation-delay: 1.5s; }
+        .bubble:nth-child(10) { right: 12%; left: auto; width: 9px; height: 9px; animation-duration: 12s; animation-delay: 3.5s; }
+
+        @keyframes rise {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(-500px) scale(0.8);
+                opacity: 0;
+            }
         }
 
         .hero p {
@@ -511,6 +564,20 @@
         </header>
 
         <section class="hero">
+            <!-- Rising bubbles animation -->
+            <div class="bubbles">
+                <div class="bubble"></div>
+                <div class="bubble"></div>
+                <div class="bubble"></div>
+                <div class="bubble"></div>
+                <div class="bubble"></div>
+                <div class="bubble"></div>
+                <div class="bubble"></div>
+                <div class="bubble"></div>
+                <div class="bubble"></div>
+                <div class="bubble"></div>
+            </div>
+
             <p>
                 Help your rubber duck follow Mama Duck through 10 worlds of adventure and challenge!
                 Strategically place hoses, slides, trampolines, fans, and more during the planning phase,
