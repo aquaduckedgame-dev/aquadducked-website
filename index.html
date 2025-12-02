@@ -29,7 +29,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0d1926 0%, #1a3a5a 50%, #0d1926 100%);
+            background: background: #0d1926;
             min-height: 100vh;
             color: #fff;
             overflow-x: hidden;
@@ -51,28 +51,28 @@
             content: '';
             position: absolute;
             bottom: 0;
-            left: -100%;
-            right: -100%;
+            left: -50%;
+            right: -50%;
             height: 80px;
             background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='rgba(64,160,220,0.4)' d='M0,60 C300,120 600,0 900,60 C1050,90 1150,30 1200,60 L1200,120 L0,120 Z'/%3E%3C/svg%3E") repeat-x;
-            animation: wave 8s linear infinite;
+            animation: wave 15s ease-in-out infinite;
         }
 
         .water-bg::after {
             content: '';
             position: absolute;
             bottom: 0;
-            left: -100%;
-            right: -100%;
+            left: -50%;
+            right: -50%;
             height: 60px;
             background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='rgba(32,128,192,0.5)' d='M0,60 C300,0 600,120 900,60 C1050,30 1150,90 1200,60 L1200,120 L0,120 Z'/%3E%3C/svg%3E") repeat-x;
-            animation: wave 6s linear infinite reverse;
+            animation: wave 15s ease-in-out infinite reverse;
         }
 
         @keyframes wave {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(50%); }
-        }
+      0%, 100% { transform: translateX(-10%); }
+      50% { transform: translateX(10%); }
+  }
 
         /* Main container */
         .container {
@@ -90,12 +90,12 @@
         }
 
         .logo {
-            width: 150px;
-            height: 150px;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 4px 20px rgba(255, 215, 0, 0.3));
-            animation: float 3s ease-in-out infinite;
-        }
+      max-width: 200px;
+      height: auto;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 4px 20px rgba(255, 215, 0, 0.3));
+      animation: float 3s ease-in-out infinite;
+  }
 
         @keyframes float {
             0%, 100% { transform: translateY(0); }
@@ -369,34 +369,34 @@
 
         <section class="hero">
             <p>
-                Guide your rubber duck to safety through clever contraptions!
-                Place hoses, slides, trampolines, fans, and more during the planning phase,
-                then watch the physics unfold as your duck bounces, slides, and splashes
-                its way to the goal.
+                Help your rubber duck follow Mama Duck through 10 worlds of adventure and challenge!
+      Strategically place hoses, slides, trampolines, fans, and more during the planning phase,
+      then watch the physics unfold as your duck bounces, slides, and splashes
+      its towards Mama.
             </p>
 
             <div class="features">
-                <div class="feature">
-                    <div class="feature-icon">🦆</div>
-                    <h3>Physics Fun</h3>
-                    <p>Realistic water and physics simulation</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🔧</div>
-                    <h3>Creative Tools</h3>
-                    <p>Hoses, slides, trampolines, fans & more</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🎨</div>
-                    <h3>Level Editor</h3>
-                    <p>Build and share your own puzzles</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🌊</div>
-                    <h3>The Pond</h3>
-                    <p>Browse community-created levels</p>
-                </div>
-            </div>
+      <div class="feature">
+          <div class="feature-icon">🎨</div>
+          <h3>Level Editor</h3>
+          <p>Build your own puzzles with an intuitive editor</p>
+      </div>
+      <div class="feature">
+          <div class="feature-icon">📤</div>
+          <h3>Share Levels</h3>
+          <p>Share via QR code or upload to The Pond</p>
+      </div>
+      <div class="feature">
+          <div class="feature-icon">🦆</div>
+          <h3>Physics Fun</h3>
+          <p>Realistic water and bouncy physics</p>
+      </div>
+      <div class="feature">
+          <div class="feature-icon">🌊</div>
+          <h3>The Pond</h3>
+          <p>Play thousands of community levels</p>
+      </div>
+  </div>
         </section>
 
         <section class="download-section">
