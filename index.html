@@ -344,6 +344,90 @@
             text-decoration: underline;
         }
 
+        /* Featured Level Card */
+        .featured-level {
+            margin-top: 20px;
+        }
+
+        .featured-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .featured-thumb {
+            width: 120px;
+            height: 68px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .featured-info {
+            flex: 1;
+        }
+
+        .featured-info h3 {
+            color: #fff;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .featured-info p {
+            color: #aab;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .featured-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .difficulty-badge {
+            background: #4a9eff;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .difficulty-badge.easy { background: #4CAF50; }
+        .difficulty-badge.medium { background: #FF9800; }
+        .difficulty-badge.hard { background: #f44336; }
+        .difficulty-badge.expert { background: #9C27B0; }
+
+        .likes-count {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+        }
+
+        .featured-play-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .featured-play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .feature-row,
@@ -376,6 +460,20 @@
 
             .qr-redirect-card {
                 padding: 30px;
+            }
+
+            .featured-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .featured-thumb {
+                width: 160px;
+                height: 90px;
+            }
+
+            .featured-meta {
+                justify-content: center;
             }
         }
     </style>
@@ -478,7 +576,27 @@
                 Browse, play, and share your favorites. Create your own levels
                 with the built-in editor and upload them for the world to enjoy.
             </p>
-            <p style="color: #889; font-size: 0.95rem;">
+
+            <!-- Featured Level -->
+            <div id="featuredLevel" class="featured-level" style="display: none;">
+                <p style="color: #ffd700; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                    <span id="featuredLabel">🏆 This Week's Most Popular Level:</span>
+                </p>
+                <div class="featured-card">
+                    <img id="featuredThumb" src="" alt="Level thumbnail" class="featured-thumb">
+                    <div class="featured-info">
+                        <h3 id="featuredTitle">Level Name</h3>
+                        <p id="featuredAuthor">by Author</p>
+                        <div class="featured-meta">
+                            <span id="featuredDifficulty" class="difficulty-badge">Medium</span>
+                            <span id="featuredLikes" class="likes-count">❤️ 0</span>
+                        </div>
+                        <button id="featuredPlayBtn" class="featured-play-btn">▶ Play Level</button>
+                    </div>
+                </div>
+            </div>
+
+            <p style="color: #889; font-size: 0.95rem; margin-top: 20px;">
                 The Pond is accessible from the main menu in-game.
             </p>
         </section>
@@ -576,9 +694,114 @@
             }
         }
 
+        // Supabase config for fetching featured level
+        const SUPABASE_URL = 'https://nobrtuawmmdkympdbdti.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vYnJ0dWF3bW1ka3ltcGRiZHRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzODEzNzMsImV4cCI6MjA3OTk1NzM3M30.ecEYYUtd1X8QCD3pKAYUuj-clrCd7ObX-SQR2vVnRNY';
+
+        let featuredLevelId = null;
+
+        async function fetchFeaturedLevel() {
+            try {
+                // Try to get this week's most popular first
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                const weekFilter = oneWeekAgo.toISOString();
+
+                let url = `${SUPABASE_URL}/rest/v1/levels?select=id,title,author_name,difficulty,likes_count,thumbnail_url&created_at=gte.${weekFilter}&order=likes_count.desc&limit=1`;
+
+                let response = await fetch(url, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                    }
+                });
+
+                let data = await response.json();
+                let isWeekly = true;
+
+                // Fallback to all-time if no weekly results
+                if (!data || data.length === 0) {
+                    url = `${SUPABASE_URL}/rest/v1/levels?select=id,title,author_name,difficulty,likes_count,thumbnail_url&order=likes_count.desc&limit=1`;
+                    response = await fetch(url, {
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                        }
+                    });
+                    data = await response.json();
+                    isWeekly = false;
+                }
+
+                if (data && data.length > 0) {
+                    displayFeaturedLevel(data[0], isWeekly);
+                }
+            } catch (error) {
+                console.error('Failed to fetch featured level:', error);
+            }
+        }
+
+        function displayFeaturedLevel(level, isWeekly) {
+            featuredLevelId = level.id;
+
+            const container = document.getElementById('featuredLevel');
+            const label = document.getElementById('featuredLabel');
+            const thumb = document.getElementById('featuredThumb');
+            const title = document.getElementById('featuredTitle');
+            const author = document.getElementById('featuredAuthor');
+            const difficulty = document.getElementById('featuredDifficulty');
+            const likes = document.getElementById('featuredLikes');
+            const playBtn = document.getElementById('featuredPlayBtn');
+
+            // Update label based on weekly or all-time
+            label.textContent = isWeekly
+                ? "🏆 This Week's Most Popular Level:"
+                : "🏆 Community Favorite:";
+
+            // Set thumbnail
+            if (level.thumbnail_url) {
+                thumb.src = level.thumbnail_url;
+            } else {
+                thumb.src = 'logo.png'; // Fallback
+            }
+
+            title.textContent = level.title || 'Untitled Level';
+            author.textContent = 'by ' + (level.author_name || 'Anonymous');
+
+            // Set difficulty with appropriate styling
+            const diff = (level.difficulty || 'medium').toLowerCase();
+            difficulty.textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
+            difficulty.className = 'difficulty-badge ' + diff;
+
+            likes.textContent = '❤️ ' + (level.likes_count || 0);
+
+            // Play button click handler
+            playBtn.onclick = () => playFeaturedLevel(level.id);
+
+            container.style.display = 'block';
+        }
+
+        function playFeaturedLevel(levelId) {
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isAndroid = userAgent.includes('android');
+            const isIOS = /iphone|ipad|ipod/.test(userAgent);
+
+            const levelTitle = document.getElementById('featuredTitle').textContent;
+
+            if (isAndroid) {
+                // Open the Play Store
+                window.location.href = 'https://play.google.com/store/apps/details?id=com.nick.aquaducked';
+            } else if (isIOS) {
+                alert('AquaDucked! is coming soon to iOS!');
+            } else {
+                // Desktop - show friendly message
+                alert('Download AquaDucked! on your mobile device, then find "' + levelTitle + '" in The Pond!');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             checkForLevelLink();
             updateDownloadButton();
+            fetchFeaturedLevel();
         });
     </script>
 </body>
