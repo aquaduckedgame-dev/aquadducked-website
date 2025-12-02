@@ -1,694 +1,529 @@
 <!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>AquaDucked! - Level Portal</title>
-      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-      <style>
-          * { box-sizing: border-box; }
-          body {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-              max-width: 800px;
-              margin: 0 auto;
-              padding: 20px;
-              background: #0d1926;
-              min-height: 100vh;
-              color: #eee;
-          }
-          h1 { color: #ffd700; text-align: center; }
-          h2 { color: #87ceeb; border-bottom: 2px solid #87ceeb; padding-bottom: 10px; }
-
-          /* Upload Form */
-          .upload-section {
-              background: rgba(255,255,255,0.1);
-              padding: 20px;
-              border-radius: 10px;
-              margin-bottom: 30px;
-          }
-          input[type="text"], input[type="password"], textarea, select {
-              width: 100%;
-              padding: 10px;
-              margin: 8px 0;
-              border: none;
-              border-radius: 5px;
-              font-size: 16px;
-          }
-          select { background: white; }
-          textarea { height: 80px; font-family: monospace; }
-
-          /* Tags */
-          .tags-section {
-              margin: 15px 0;
-          }
-          .tags-section label {
-              display: block;
-              margin-bottom: 8px;
-              color: #87ceeb;
-          }
-          .tag-checkboxes {
-              display: flex;
-              flex-wrap: wrap;
-              gap: 10px;
-          }
-          .tag-checkboxes label {
-              background: rgba(255,255,255,0.1);
-              padding: 8px 12px;
-              border-radius: 20px;
-              cursor: pointer;
-              transition: background 0.2s;
-          }
-          .tag-checkboxes input[type="checkbox"] {
-              margin-right: 5px;
-          }
-          .tag-checkboxes label:has(input:checked) {
-              background: #87ceeb;
-              color: #1a1a2e;
-          }
-
-          /* File Input Styling */
-          .file-input-wrapper {
-              margin: 15px 0;
-          }
-          .file-input-wrapper > label {
-              display: block;
-              margin-bottom: 8px;
-              color: #87ceeb;
-          }
-          input[type="file"] {
-              width: 100%;
-              padding: 10px;
-              background: rgba(255,255,255,0.9);
-              border-radius: 5px;
-              cursor: pointer;
-          }
-          .file-name {
-              margin-top: 8px;
-              padding: 10px;
-              background: rgba(0,255,0,0.1);
-              border-radius: 5px;
-              color: #90EE90;
-              display: none;
-          }
-          .file-name.visible { display: block; }
-          .file-name.error {
-              background: rgba(255,0,0,0.1);
-              color: #ff6b6b;
-          }
-
-          button {
-              background: #ffd700;
-              color: #1a1a2e;
-              border: none;
-              padding: 12px 24px;
-              font-size: 16px;
-              font-weight: bold;
-              border-radius: 5px;
-              cursor: pointer;
-              margin-top: 10px;
-          }
-          button:hover { background: #ffed4a; }
-          button:disabled { background: #666; cursor: not-allowed; }
-
-          /* Level List */
-          .level-card {
-              background: rgba(255,255,255,0.1);
-              padding: 15px;
-              border-radius: 10px;
-              margin-bottom: 15px;
-          }
-          .level-card h3 { margin: 0 0 10px 0; color: #ffd700; }
-          .level-card .meta { color: #ccc; margin: 5px 0; }
-          .level-card small { color: #888; }
-          .level-card .difficulty {
-              display: inline-block;
-              padding: 3px 10px;
-              border-radius: 12px;
-              font-size: 12px;
-              font-weight: bold;
-              margin-right: 10px;
-          }
-          .difficulty-easy { background: #4CAF50; color: white; }
-          .difficulty-medium { background: #FF9800; color: white; }
-          .difficulty-hard { background: #f44336; color: white; }
-          .difficulty-expert { background: #9C27B0; color: white; }
-
-          .level-card .tags {
-              margin-top: 8px;
-          }
-          .level-card .tag {
-              display: inline-block;
-              background: rgba(135, 206, 235, 0.3);
-              color: #87ceeb;
-              padding: 3px 10px;
-              border-radius: 12px;
-              font-size: 12px;
-              margin-right: 5px;
-              margin-top: 5px;
-          }
-
-          .level-actions { margin-top: 10px; }
-          .level-actions button {
-              margin-right: 10px;
-              padding: 8px 16px;
-              font-size: 14px;
-          }
-          .download-btn { background: #4CAF50; color: white; }
-          .download-btn:hover { background: #45a049; }
-          .share-btn { background: #87ceeb; }
-
-          /* Messages */
-          .message {
-              padding: 10px;
-              border-radius: 5px;
-              margin: 10px 0;
-              text-align: center;
-          }
-          .success { background: #2e7d32; }
-          .error { background: #c62828; }
-
-          /* Upload code field */
-          .code-field {
-              background: rgba(255,215,0,0.1);
-              border: 2px solid #ffd700;
-          }
-          /* Tabs */
-  .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
-      border-bottom: 2px solid #2a4a6a;
-      padding-bottom: 10px;
-  }
-
-  .tab-btn {
-      background: transparent;
-      border: none;
-      color: #88aacc;
-      font-size: 18px;
-      padding: 12px 24px;
-      cursor: pointer;
-      border-radius: 8px 8px 0 0;
-      transition: all 0.3s;
-  }
-
-  .tab-btn:hover {
-      background: #1a3a5a;
-      color: white;
-  }
-
-  .tab-btn.active {
-      background: #2a5a8a;
-      color: white;
-  }
-
-  .tab-content {
-      display: none;
-  }
-
-  .tab-content.active {
-      display: block;
-  }
-
-  /* Upload Form */
-  .upload-form {
-      max-width: 500px;
-      margin: 0 auto;
-  }
-
-  .upload-form label {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 5px;
-      color: #88aacc;
-  }
-
-  .upload-form input[type="text"],
-  .upload-form input[type="password"],
-  .upload-form input[type="file"],
-  .upload-form select {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #2a4a6a;
-      background: #1a2a3a;
-      color: white;
-      font-size: 16px;
-  }
-
-  .upload-btn {
-      width: 100%;
-      margin-top: 20px;
-      padding: 15px;
-      font-size: 18px;
-      background: #22aa66;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-  }
-
-  .upload-btn:hover {
-      background: #33bb77;
-  }
-
-  /* Admin Panel */
-  .admin-panel {
-      max-width: 400px;
-      margin: 0 auto;
-      text-align: center;
-  }
-
-  .admin-login {
-      display: flex;
-      gap: 10px;
-      margin: 20px 0;
-  }
-
-  .admin-login input {
-      flex: 1;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #2a4a6a;
-      background: #1a2a3a;
-      color: white;
-  }
-
-  .admin-login button {
-      padding: 12px 20px;
-      background: #aa4444;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-  }
-
-  .admin-status {
-      padding: 15px;
-      background: #1a2a3a;
-      border-radius: 8px;
-      margin-top: 20px;
-  }
-
-  #adminModeText {
-      font-weight: bold;
-      color: #ff6666;
-  }
-
-  .tag-checkboxes {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-  }
-
-  .tag-checkboxes label {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: #1a3a5a;
-      padding: 8px 12px;
-      border-radius: 20px;
-      cursor: pointer;
-      margin: 0;
-  }
-
-  .file-name {
-      margin-top: 10px;
-      padding: 10px;
-      background: #1a3a5a;
-      border-radius: 8px;
-      display: none;
-  }
-
-  .file-name.visible {
-      display: block;
-  }
-
-  .file-name.error {
-      background: #4a1a1a;
-      color: #ff8888;
-  }
-      </style>
-  </head>
-  <body>
-      <div class="container">
-          <h1>🦆 AquaDucked! Level Portal</h1>
-
-          <!-- Tab Navigation -->
-          <div class="tabs">
-              <button class="tab-btn active" onclick="showTab('browse')">🌊 Browse Levels</button>
-              <button class="tab-btn" onclick="showTab('upload')">📤 Upload Level</button>
-              <button class="tab-btn" onclick="showTab('admin')">🔐 Admin</button>
-          </div>
-
-          <!-- Browse Tab -->
-          <div id="browseTab" class="tab-content active">
-              <div id="levelList">Loading levels...</div>
-          </div>
-
-          <!-- Upload Tab -->
-          <div id="uploadTab" class="tab-content">
-              <div class="upload-form">
-                  <h2>Upload a Level</h2>
-
-                  <label>Level File (JSON)</label>
-                  <input type="file" id="levelFile" accept=".json" onchange="handleFileSelect(event)">
-                  <div id="fileName" class="file-name"></div>
-
-                  <label>Title</label>
-                  <input type="text" id="title" placeholder="Level title">
-
-                  <label>Author</label>
-                  <input type="text" id="author" placeholder="Your name">
-
-                  <label>Difficulty</label>
-                  <select id="difficulty">
-                      <option value="">Select difficulty...</option>
-                      <option value="easy">Easy</option>
-                      <option value="medium">Medium</option>
-                      <option value="hard">Hard</option>
-                      <option value="expert">Expert</option>
-                  </select>
-
-                  <label>Tags</label>
-                  <div class="tag-checkboxes">
-                      <label><input type="checkbox" value="Puzzle"> Puzzle</label>
-                      <label><input type="checkbox" value="Action"> Action</label>
-                      <label><input type="checkbox" value="Precision"> Precision</label>
-                      <label><input type="checkbox" value="Creative"> Creative</label>
-                      <label><input type="checkbox" value="Short"> Short</label>
-                      <label><input type="checkbox" value="Long"> Long</label>
-                  </div>
-
-                  <label>Upload Code</label>
-                  <input type="password" id="uploadCode" placeholder="Enter upload code">
-
-                  <button class="upload-btn" onclick="uploadLevel()">📤 Upload Level</button>
-                  <div id="uploadMessage"></div>
-              </div>
-          </div>
-
-          <!-- Admin Tab -->
-          <div id="adminTab" class="tab-content">
-              <div class="admin-panel">
-                  <h2>Admin Panel</h2>
-                  <p>Enter the admin code to enable level management.</p>
-
-                  <div class="admin-login">
-                      <input type="password" id="adminCode" placeholder="Admin code">
-                      <button onclick="toggleAdmin()">🔓 Toggle Admin Mode</button>
-                  </div>
-
-                  <div id="adminStatus" class="admin-status">
-                      Status: <span id="adminModeText">OFF</span>
-                  </div>
-              </div>
-          </div>
-      </div>
-
-      <script>
-          // ⚠️ REPLACE THESE WITH YOUR ACTUAL VALUES FROM SUPABASE
-          const SUPABASE_URL = 'https://nobrtuawmmdkympdbdti.supabase.co';
-          const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vYnJ0dWF3bW1ka3ltcGRiZHRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzODEzNzMsImV4cCI6MjA3OTk1NzM3M30.ecEYYUtd1X8QCD3pKAYUuj-clrCd7ObX-SQR2vVnRNY';
-
-          // ⚠️ CHANGE THIS TO YOUR SECRET UPLOAD CODE
-          const UPLOAD_CODE = 'ducktals';
-
-          // Initialize Supabase
-          const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-          // Store selected file data
-          let selectedLevelData = null;
-          let fileValidationPassed = false;
-          let isAdmin = false;
-          const ADMIN_CODE = 'ducktalsadmin';
-
-          // Load levels on page load
-          document.addEventListener('DOMContentLoaded', loadLevels);
-
-          function validateLevelData(data) {
-              const errors = [];
-
-              if (!data.duck_start_position && !data.duck_start) {
-      errors.push('Missing duck_start position');
-  } else {
-      const duckStart = data.duck_start_position || data.duck_start;
-      if (typeof duckStart.x !== 'number') errors.push('duck_start.x must be a number');
-      if (typeof duckStart.y !== 'number') errors.push('duck_start.y must be a number');
-  }
-
-  if (!data.goal_position && !data.goal) {
-      errors.push('Missing goal position');
-  } else {
-      const goal = data.goal_position || data.goal;
-      if (typeof goal.x !== 'number') errors.push('goal.x must be a number');
-      if (typeof goal.y !== 'number') errors.push('goal.y must be a number');
-  }
-
-              return errors;
-          }
-
-          function getSelectedTags() {
-              const checkboxes = document.querySelectorAll('.tag-checkboxes input[type="checkbox"]:checked');
-              return Array.from(checkboxes).map(cb => cb.value);
-          }
-
-          function handleFileSelect(event) {
-              const file = event.target.files[0];
-              const fileNameDiv = document.getElementById('fileName');
-
-              if (!file) {
-                  selectedLevelData = null;
-                  fileValidationPassed = false;
-                  fileNameDiv.classList.remove('visible');
-                  return;
-              }
-
-              const reader = new FileReader();
-              reader.onload = function(e) {
-                  try {
-                      const data = JSON.parse(e.target.result);
-
-                      const validationErrors = validateLevelData(data);
-
-                      if (validationErrors.length > 0) {
-                          selectedLevelData = null;
-                          fileValidationPassed = false;
-                          fileNameDiv.innerHTML = '✗ Invalid level file:<br>• ' + validationErrors.join('<br>• ');
-                          fileNameDiv.classList.add('visible', 'error');
-                          return;
-                      }
-
-                      selectedLevelData = data;
-                      fileValidationPassed = true;
-                      fileNameDiv.textContent = '✓ Valid level: ' + file.name;
-                      fileNameDiv.classList.add('visible');
-                      fileNameDiv.classList.remove('error');
-
-                      const titleInput = document.getElementById('title');
-                      if (!titleInput.value) {
-                          titleInput.value = data.level_id || file.name.replace('.json', '');
-                      }
-
-                      const authorInput = document.getElementById('author');
-                      if (!authorInput.value && data.author) {
-                          authorInput.value = data.author;
-                      }
-
-                  } catch (err) {
-                      selectedLevelData = null;
-                      fileValidationPassed = false;
-                      fileNameDiv.textContent = '✗ Invalid JSON file: ' + err.message;
-                      fileNameDiv.classList.add('visible', 'error');
-                  }
-              };
-              reader.readAsText(file);
-          }
-
-          async function loadLevels() {
-              const { data, error } = await supabase
-                  .from('levels')
-                  .select('*')
-                  .order('created_at', { ascending: false });
-
-              const levelList = document.getElementById('levelList');
-
-              if (error) {
-                  levelList.innerHTML = '<p class="message error">Error loading levels: ' + error.message + '</p>';
-                  return;
-              }
-
-              if (data.length === 0) {
-                  levelList.innerHTML = '<p>No levels yet. Be the first to upload!</p>';
-                  return;
-              }
-
-              levelList.innerHTML = data.map(level => {
-                  const difficultyClass = level.difficulty ? `difficulty-${level.difficulty}` : '';
-                  const difficultyLabel = level.difficulty ? level.difficulty.charAt(0).toUpperCase() +
-  level.difficulty.slice(1) : '';
-                  const tags = level.tags ? level.tags.split(',').filter(t => t.trim()) : [];
-
-                  return `
-                      <div class="level-card">
-                          <h3>${escapeHtml(level.title)}</h3>
-                          <div class="meta">
-                              By ${escapeHtml(level.author_name)}
-                              ${difficultyLabel ? `<span class="difficulty ${difficultyClass}">${difficultyLabel}</span>` :     
-  ''}
-                          </div>
-                          ${tags.length > 0 ? `
-                              <div class="tags">
-                                  ${tags.map(tag => `<span class="tag">${escapeHtml(tag.trim())}</span>`).join('')}
-                              </div>
-                          ` : ''}
-                          <small>${new Date(level.created_at).toLocaleDateString()} • ${level.download_count}
-  downloads</small>
-                          <div class="level-actions">
-      <button class="download-btn" onclick="downloadLevel(${level.id}, '${escapeJs(level.title)}')">⬇ Download</button>
-      <button class="share-btn" onclick="copyShareLink(${level.id})">🔗 Share</button>
-      ${isAdmin ? `<button class="delete-btn" onclick="deleteLevel(${level.id})" style="background:#ff4444;">🗑️
-  Delete</button>` : ''}
-  </div>
-                      </div>
-                  `;
-              }).join('');
-          }
-
-          async function uploadLevel() {
-              const messageDiv = document.getElementById('uploadMessage');
-              const uploadCode = document.getElementById('uploadCode').value.trim();
-
-              if (uploadCode !== UPLOAD_CODE) {
-                  messageDiv.innerHTML = '<p class="message error">Invalid upload code.</p>';
-                  return;
-              }
-
-              const title = document.getElementById('title').value.trim();
-              const author = document.getElementById('author').value.trim();
-              const difficulty = document.getElementById('difficulty').value;
-              const tags = getSelectedTags().join(',');
-
-              if (!title || !author) {
-                  messageDiv.innerHTML = '<p class="message error">Please fill in title and author.</p>';
-                  return;
-              }
-
-              if (!selectedLevelData || !fileValidationPassed) {
-                  messageDiv.innerHTML = '<p class="message error">Please select a valid level JSON file.</p>';
-                  return;
-              }
-
-              const { data, error } = await supabase
-                  .from('levels')
-                  .insert([{
-                      title: title,
-                      author_name: author,
-                      difficulty: difficulty,
-                      tags: tags,
-                      level_data: selectedLevelData
-                  }]);
-
-              if (error) {
-                  messageDiv.innerHTML = '<p class="message error">Upload failed: ' + error.message + '</p>';
-                  return;
-              }
-
-              messageDiv.innerHTML = '<p class="message success">Level uploaded successfully!</p>';
-
-              // Clear form
-              document.getElementById('title').value = '';
-              document.getElementById('difficulty').value = '';
-              document.querySelectorAll('.tag-checkboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
-              document.getElementById('levelFile').value = '';
-              document.getElementById('fileName').classList.remove('visible');
-              selectedLevelData = null;
-              fileValidationPassed = false;
-              loadLevels();
-          }
-
-          async function downloadLevel(id, title) {
-              const { data, error } = await supabase
-                  .from('levels')
-                  .select('level_data, download_count')
-                  .eq('id', id)
-                  .single();
-
-              if (error) {
-                  alert('Error fetching level: ' + error.message);
-                  return;
-              }
-
-              await supabase
-                  .from('levels')
-                  .update({ download_count: data.download_count + 1 })
-                  .eq('id', id);
-
-              const blob = new Blob([JSON.stringify(data.level_data, null, 2)], { type: 'application/json' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = title.replace(/[^a-z0-9]/gi, '_') + '.json';
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              URL.revokeObjectURL(url);
-
-              loadLevels();
-          }
-
-          function copyShareLink(id) {
-              const link = window.location.origin + '?level=' + id;
-              navigator.clipboard.writeText(link);
-              alert('Share link copied!');
-          }
-
-          function escapeHtml(text) {
-              const div = document.createElement('div');
-              div.textContent = text;
-              return div.innerHTML;
-          }
-
-          function escapeJs(text) {
-              return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
-          }
-        function toggleAdmin() {
-      const code = document.getElementById('adminCode').value;
-      if (code === ADMIN_CODE) {
-          isAdmin = !isAdmin;
-          document.getElementById('adminCode').value = '';
-          document.getElementById('adminModeText').textContent = isAdmin ? 'ON' : 'OFF';
-          document.getElementById('adminModeText').style.color = isAdmin ? '#66ff66' : '#ff6666';
-          loadLevels();
-          showTab('browse');  // Switch to browse tab to see delete buttons
-      } else {
-          alert('Invalid code');
-      }
-  }
-  async function deleteLevel(id) {
-      if (!confirm('Delete this level permanently?')) return;
-
-      const { error } = await supabase
-          .from('levels')
-          .delete()
-          .eq('id', id);
-
-      if (error) {
-          alert('Delete failed: ' + error.message);
-      } else {
-          alert('Level deleted');
-          loadLevels();
-      }
-  }
-  function showTab(tabName) {
-      // Hide all tabs
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-
-      // Show selected tab
-      document.getElementById(tabName + 'Tab').classList.add('active');
-      event.target.classList.add('active');
-  }
-      </script>
-  </body>
-  </html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaDucked! - A Physics Puzzle Game</title>
+
+    <!-- App Links for Android -->
+    <meta property="al:android:url" content="aquaducked://level/">
+    <meta property="al:android:package" content="com.aquaducked.game">
+    <meta property="al:android:app_name" content="AquaDucked!">
+    <meta property="al:web:url" content="https://aquaduckedgame.com">
+
+    <!-- Open Graph for sharing -->
+    <meta property="og:title" content="AquaDucked! - A Physics Puzzle Game">
+    <meta property="og:description" content="Guide your rubber duck to safety using hoses, slides, trampolines and more! Create and share your own levels.">
+    <meta property="og:image" content="https://aquaduckedgame.com/logo.png">
+    <meta property="og:url" content="https://aquaduckedgame.com">
+    <meta property="og:type" content="website">
+
+    <link rel="icon" type="image/png" href="logo.png">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d1926 0%, #1a3a5a 50%, #0d1926 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Water wave animation at bottom */
+        .water-bg {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(to bottom, transparent, rgba(32, 128, 192, 0.3));
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .water-bg::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -100%;
+            right: -100%;
+            height: 80px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='rgba(64,160,220,0.4)' d='M0,60 C300,120 600,0 900,60 C1050,90 1150,30 1200,60 L1200,120 L0,120 Z'/%3E%3C/svg%3E") repeat-x;
+            animation: wave 8s linear infinite;
+        }
+
+        .water-bg::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -100%;
+            right: -100%;
+            height: 60px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='rgba(32,128,192,0.5)' d='M0,60 C300,0 600,120 900,60 C1050,30 1150,90 1200,60 L1200,120 L0,120 Z'/%3E%3C/svg%3E") repeat-x;
+            animation: wave 6s linear infinite reverse;
+        }
+
+        @keyframes wave {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(50%); }
+        }
+
+        /* Main container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 20px rgba(255, 215, 0, 0.3));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            color: #ffd700;
+            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 1.4rem;
+            color: #87ceeb;
+            margin-bottom: 30px;
+        }
+
+        /* Hero section */
+        .hero {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #ccd;
+            margin-bottom: 20px;
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature {
+            background: rgba(135, 206, 235, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(135, 206, 235, 0.2);
+            transition: transform 0.3s, background 0.3s;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            background: rgba(135, 206, 235, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .feature h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .feature p {
+            color: #aab;
+            font-size: 0.95rem;
+        }
+
+        /* Download buttons */
+        .download-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #1a1a2e;
+            padding: 18px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .download-btn.secondary {
+            background: linear-gradient(135deg, #4a9eff, #2080dd);
+            color: white;
+            box-shadow: 0 4px 20px rgba(74, 158, 255, 0.3);
+        }
+
+        .download-btn.secondary:hover {
+            box-shadow: 0 6px 30px rgba(74, 158, 255, 0.4);
+        }
+
+        .btn-icon {
+            font-size: 1.5rem;
+        }
+
+        .download-note {
+            margin-top: 15px;
+            color: #889;
+            font-size: 0.9rem;
+        }
+
+        /* The Pond section */
+        .pond-section {
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            text-align: center;
+        }
+
+        .pond-section h2 {
+            color: #ffd700;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .pond-section p {
+            color: #ccd;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        /* QR Code redirect overlay (shown when accessing /level/xxx) */
+        .qr-redirect-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(13, 25, 38, 0.98);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .qr-redirect-overlay.active {
+            display: flex;
+        }
+
+        .qr-redirect-card {
+            background: linear-gradient(135deg, #1a3a5a, #0d1926);
+            border-radius: 25px;
+            padding: 50px;
+            text-align: center;
+            max-width: 500px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .qr-redirect-card .logo {
+            width: 120px;
+            height: 120px;
+        }
+
+        .qr-redirect-card h2 {
+            color: #ffd700;
+            font-size: 1.8rem;
+            margin: 20px 0;
+        }
+
+        .qr-redirect-card p {
+            color: #aab;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .qr-redirect-card .level-name {
+            background: rgba(135, 206, 235, 0.2);
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: #87ceeb;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            word-break: break-all;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #667;
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: #87ceeb;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .tagline {
+                font-size: 1.1rem;
+            }
+
+            .hero, .pond-section {
+                padding: 25px;
+            }
+
+            .download-btn {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+            }
+
+            .qr-redirect-card {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Water background animation -->
+    <div class="water-bg"></div>
+
+    <!-- QR Code Redirect Overlay -->
+    <div id="qrRedirect" class="qr-redirect-overlay">
+        <div class="qr-redirect-card">
+            <img src="logo.png" alt="AquaDucked!" class="logo">
+            <h2>Level Shared With You!</h2>
+            <div id="levelInfo" class="level-name" style="display: none;"></div>
+            <p>Someone shared an AquaDucked! level with you. Get the app to play it!</p>
+            <a href="#" id="storeLink" class="download-btn">
+                <span class="btn-icon">📱</span>
+                Get AquaDucked!
+            </a>
+            <p class="download-note" style="margin-top: 20px;">
+                <a href="/" style="color: #87ceeb;">← Back to website</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <header>
+            <img src="logo.png" alt="AquaDucked!" class="logo">
+            <h1>AquaDucked!</h1>
+            <p class="tagline">A Physics Puzzle Game</p>
+        </header>
+
+        <section class="hero">
+            <p>
+                Guide your rubber duck to safety through clever contraptions!
+                Place hoses, slides, trampolines, fans, and more during the planning phase,
+                then watch the physics unfold as your duck bounces, slides, and splashes
+                its way to the goal.
+            </p>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🦆</div>
+                    <h3>Physics Fun</h3>
+                    <p>Realistic water and physics simulation</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Creative Tools</h3>
+                    <p>Hoses, slides, trampolines, fans & more</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Level Editor</h3>
+                    <p>Build and share your own puzzles</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🌊</div>
+                    <h3>The Pond</h3>
+                    <p>Browse community-created levels</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="download-section">
+            <a href="#" id="mainDownloadBtn" class="download-btn">
+                <span class="btn-icon">📱</span>
+                Download for Android
+            </a>
+            <p class="download-note">Coming soon to Google Play Store</p>
+            <!-- Future: Add iOS button
+            <a href="#" class="download-btn secondary" style="margin-left: 15px;">
+                <span class="btn-icon">🍎</span>
+                Download for iOS
+            </a>
+            -->
+        </section>
+
+        <section class="pond-section">
+            <h2>🌊 The Pond</h2>
+            <p>
+                Discover thousands of community-created levels right in the game!
+                Browse, play, and share your favorites. Create your own levels
+                with the built-in editor and upload them for the world to enjoy.
+            </p>
+            <p style="color: #889; font-size: 0.95rem;">
+                The Pond is accessible from the main menu in-game.
+            </p>
+        </section>
+
+        <footer>
+            <p>Made with 🦆 by the AquaDucked! team</p>
+            <p style="margin-top: 10px;">
+                <a href="mailto:contact@aquaduckedgame.com">Contact</a> ·
+                <a href="/privacy">Privacy Policy</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Detect if this is a level share link
+        // Formats: /level/xxx or ?level=xxx (legacy from old portal)
+        function checkForLevelLink() {
+            const path = window.location.pathname;
+            const params = new URLSearchParams(window.location.search);
+
+            let levelData = null;
+
+            // Check /level/xxx format (from QR codes)
+            if (path.startsWith('/level/')) {
+                levelData = path.substring(7); // Remove '/level/'
+            }
+            // Check ?level=xxx format (legacy portal links)
+            else if (params.has('level')) {
+                levelData = params.get('level');
+            }
+
+            if (levelData) {
+                showQRRedirect(levelData);
+            }
+        }
+
+        function showQRRedirect(levelData) {
+            const overlay = document.getElementById('qrRedirect');
+            const levelInfo = document.getElementById('levelInfo');
+            const storeLink = document.getElementById('storeLink');
+
+            // Try to detect if it's a level ID (number) or encoded level data
+            if (/^\d+$/.test(levelData)) {
+                // Legacy portal level ID - just show generic message
+                levelInfo.style.display = 'none';
+            } else {
+                // Encoded level data from QR code
+                // We could try to decode it to show level name, but for now just indicate it's a shared level
+                levelInfo.textContent = 'Shared Level';
+                levelInfo.style.display = 'block';
+            }
+
+            // Detect platform and set appropriate store link
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isAndroid = userAgent.includes('android');
+            const isIOS = /iphone|ipad|ipod/.test(userAgent);
+
+            if (isAndroid) {
+                // Try to open the app first, fall back to Play Store
+                // For now, link to Play Store (update this URL when you have one)
+                storeLink.href = 'https://play.google.com/store/apps/details?id=com.aquaducked.game';
+                storeLink.innerHTML = '<span class="btn-icon">▶️</span> Get on Google Play';
+
+                // Try to open the app directly
+                const appLink = 'aquaducked://level/' + levelData;
+                setTimeout(() => {
+                    window.location.href = appLink;
+                }, 100);
+            } else if (isIOS) {
+                // Future: Link to App Store
+                storeLink.href = '#';
+                storeLink.innerHTML = '<span class="btn-icon">🍎</span> Coming to iOS';
+            } else {
+                // Desktop - show general download info
+                storeLink.href = '#';
+                storeLink.innerHTML = '<span class="btn-icon">📱</span> Available on Mobile';
+            }
+
+            overlay.classList.add('active');
+        }
+
+        // Update main download button based on platform
+        function updateDownloadButton() {
+            const btn = document.getElementById('mainDownloadBtn');
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isAndroid = userAgent.includes('android');
+            const isIOS = /iphone|ipad|ipod/.test(userAgent);
+
+            if (isAndroid) {
+                btn.href = 'https://play.google.com/store/apps/details?id=com.aquaducked.game';
+                btn.innerHTML = '<span class="btn-icon">▶️</span> Get on Google Play';
+            } else if (isIOS) {
+                btn.href = '#';
+                btn.innerHTML = '<span class="btn-icon">🍎</span> Coming to iOS';
+            }
+            // Desktop keeps default
+        }
+
+        // Run on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkForLevelLink();
+            updateDownloadButton();
+        });
+    </script>
+</body>
+</html>
