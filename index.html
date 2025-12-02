@@ -71,9 +71,9 @@
         }
 
         @keyframes wave {
-      0%, 100% { transform: translateX(-10%); }
-      50% { transform: translateX(10%); }
-  }
+            0%, 100% { transform: translateX(-10%); }
+            50% { transform: translateX(10%); }
+        }
 
         /* Main container */
         .container {
@@ -91,11 +91,11 @@
         }
 
         .logo {
-      max-width: 500px;
-      width: 90%;
-      height: auto;
-      margin-bottom: 10px;
-  }
+            max-width: 500px;
+            width: 90%;
+            height: auto;
+            margin-bottom: 10px;
+        }
 
         h1 {
             font-size: 3.5rem;
@@ -103,7 +103,6 @@
             text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
             margin-bottom: 10px;
         }
-
 
         /* Hero section */
         .hero {
@@ -122,41 +121,83 @@
             margin-bottom: 20px;
         }
 
-        /* Features */
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
+        /* Features Showcase */
+        .features-showcase {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
 
-        .feature {
-            background: rgba(135, 206, 235, 0.1);
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            border: 1px solid rgba(135, 206, 235, 0.2);
-            transition: transform 0.3s, background 0.3s;
+        .feature-row {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 40px;
         }
 
-        .feature:hover {
-            transform: translateY(-5px);
-            background: rgba(135, 206, 235, 0.15);
+        .feature-row.reverse {
+            flex-direction: row-reverse;
         }
 
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
+        .feature-image {
+            flex: 1;
+            max-width: 350px;
         }
 
-        .feature h3 {
+        .feature-image img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .feature-image img:hover {
+            transform: scale(1.03);
+        }
+
+        .feature-text {
+            flex: 1;
+        }
+
+        .feature-text h3 {
+            font-size: 1.5rem;
             color: #ffd700;
             margin-bottom: 10px;
         }
 
-        .feature p {
-            color: #aab;
-            font-size: 0.95rem;
+        .feature-text p {
+            font-size: 1.1rem;
+            color: #ccd;
+            line-height: 1.6;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            cursor: pointer;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+            border-radius: 8px;
         }
 
         /* Download buttons */
@@ -229,7 +270,7 @@
             margin-bottom: 20px;
         }
 
-        /* QR Code redirect overlay (shown when accessing /level/xxx) */
+        /* QR Code redirect overlay */
         .qr-redirect-overlay {
             display: none;
             position: fixed;
@@ -304,13 +345,24 @@
         }
 
         /* Responsive */
+        @media (max-width: 768px) {
+            .feature-row,
+            .feature-row.reverse {
+                flex-direction: column;
+            }
+
+            .feature-image {
+                max-width: 100%;
+            }
+
+            .feature-text {
+                text-align: center;
+            }
+        }
+
         @media (max-width: 600px) {
             h1 {
                 font-size: 2.5rem;
-            }
-
-            .tagline {
-                font-size: 1.1rem;
             }
 
             .hero, .pond-section {
@@ -325,73 +377,17 @@
             .qr-redirect-card {
                 padding: 30px;
             }
-              .features-showcase {
-      max-width: 1000px;
-      margin: 40px auto;
-      padding: 0 20px;
-  }
-
-  .feature-row {
-      display: flex;
-      align-items: center;
-      gap: 30px;
-      margin-bottom: 40px;
-  }
-
-  .feature-row.reverse {
-      flex-direction: row-reverse;
-  }
-
-  .feature-image {
-      flex: 1;
-      max-width: 500px;
-  }
-
-  .feature-image img {
-      width: 100%;
-      max-height: 300px;
-      object-fit: contain;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  }
-
-  .feature-text {
-      flex: 1;
-  }
-
-  .feature-text h3 {
-      font-size: 1.5rem;
-      color: #ffd700;
-      margin-bottom: 10px;
-  }
-
-  .feature-text p {
-      font-size: 1.1rem;
-      color: #ccd;
-      line-height: 1.6;
-  }
-
-  /* Mobile: stack vertically */
-  @media (max-width: 768px) {
-      .feature-row,
-      .feature-row.reverse {
-          flex-direction: column;
-      }
-
-      .feature-image {
-          max-width: 100%;
-      }
-
-      .feature-text {
-          text-align: center;
-      }
-  }
         }
     </style>
 </head>
 <body>
     <!-- Water background animation -->
     <div class="water-bg"></div>
+
+    <!-- Lightbox for expanded images -->
+    <div class="lightbox" id="lightbox">
+        <img src="" alt="Expanded view" id="lightbox-img">
+    </div>
 
     <!-- QR Code Redirect Overlay -->
     <div id="qrRedirect" class="qr-redirect-overlay">
@@ -419,56 +415,52 @@
         <section class="hero">
             <p>
                 Help your rubber duck follow Mama Duck through 10 worlds of adventure and challenge!
-      Strategically place hoses, slides, trampolines, fans, and more during the planning phase,
-      then watch the physics unfold as your duck bounces, slides, and splashes
-      its towards Mama.
+                Strategically place hoses, slides, trampolines, fans, and more during the planning phase,
+                then watch the physics unfold as your duck bounces, slides, and splashes its way towards Mama.
             </p>
 
             <!-- Features with screenshots -->
-  <div class="features-showcase">
-      <div class="feature-row">
-          <div class="feature-image">
-              <img src="Editor.png" alt="Level Editor">
-          </div>
-          <div class="feature-text">
-              <h3>🎨 Level Editor</h3>
-              <p>Build your own puzzles with an intuitive drag-and-drop editor. Choose from platforms, slides, hoses,
-  trampolines, fans, and more.</p>
-          </div>
-      </div>
+            <div class="features-showcase">
+                <div class="feature-row">
+                    <div class="feature-image">
+                        <img src="Editor.png" alt="Level Editor">
+                    </div>
+                    <div class="feature-text">
+                        <h3>🎨 Level Editor</h3>
+                        <p>Build your own puzzles with an intuitive drag-and-drop editor. Choose from platforms, slides, hoses, trampolines, fans, and more.</p>
+                    </div>
+                </div>
 
-      <div class="feature-row reverse">
-          <div class="feature-image">
-              <img src="Hello_Share.png" alt="Share Levels">
-          </div>
-          <div class="feature-text">
-              <h3>📤 Share Levels</h3>
-              <p>Share your creations with a QR code. Friends can scan and play your level instantly—no account needed.</p>     
-          </div>
-      </div>
+                <div class="feature-row reverse">
+                    <div class="feature-image">
+                        <img src="Hello_Share.png" alt="Share Levels">
+                    </div>
+                    <div class="feature-text">
+                        <h3>📤 Share Levels</h3>
+                        <p>Share your creations with a QR code. Friends can scan and play your level instantly—no account needed.</p>
+                    </div>
+                </div>
 
-      <div class="feature-row">
-          <div class="feature-image">
-              <img src="Physics.png" alt="Physics Fun">
-          </div>
-          <div class="feature-text">
-              <h3>🎈 Physics Fun</h3>
-              <p>Realistic water, bouncy trampolines, floating balloons, and rope swings. Watch your duck splash, bounce,       
-  and float to the goal.</p>
-          </div>
-      </div>
+                <div class="feature-row">
+                    <div class="feature-image">
+                        <img src="Physics.png" alt="Physics Fun">
+                    </div>
+                    <div class="feature-text">
+                        <h3>🎈 Physics Fun</h3>
+                        <p>Realistic water, bouncy trampolines, floating balloons, and rope swings. Watch your duck splash, bounce, and float to the goal.</p>
+                    </div>
+                </div>
 
-      <div class="feature-row reverse">
-          <div class="feature-image">
-              <img src="Pond.png" alt="The Pond">
-          </div>
-          <div class="feature-text">
-              <h3>🌊 The Pond</h3>
-              <p>Browse and play community levels from players around the world. Filter by difficulty, search by name, and      
-  favorite the best ones.</p>
-          </div>
-      </div>
-  </div>
+                <div class="feature-row reverse">
+                    <div class="feature-image">
+                        <img src="Pond.png" alt="The Pond">
+                    </div>
+                    <div class="feature-text">
+                        <h3>🌊 The Pond</h3>
+                        <p>Browse and play community levels from players around the world. Filter by difficulty, search by name, and favorite the best ones.</p>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section class="download-section">
@@ -477,12 +469,6 @@
                 Download for Android
             </a>
             <p class="download-note">Coming soon to Google Play Store</p>
-            <!-- Future: Add iOS button
-            <a href="#" class="download-btn secondary" style="margin-left: 15px;">
-                <span class="btn-icon">🍎</span>
-                Download for iOS
-            </a>
-            -->
         </section>
 
         <section class="pond-section">
@@ -507,20 +493,31 @@
     </div>
 
     <script>
+        // Lightbox functionality
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+
+        document.querySelectorAll('.feature-image img').forEach(img => {
+            img.addEventListener('click', () => {
+                lightboxImg.src = img.src;
+                lightbox.classList.add('active');
+            });
+        });
+
+        lightbox.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+
         // Detect if this is a level share link
-        // Formats: /level/xxx or ?level=xxx (legacy from old portal)
         function checkForLevelLink() {
             const path = window.location.pathname;
             const params = new URLSearchParams(window.location.search);
 
             let levelData = null;
 
-            // Check /level/xxx format (from QR codes)
             if (path.startsWith('/level/')) {
-                levelData = path.substring(7); // Remove '/level/'
-            }
-            // Check ?level=xxx format (legacy portal links)
-            else if (params.has('level')) {
+                levelData = path.substring(7);
+            } else if (params.has('level')) {
                 levelData = params.get('level');
             }
 
@@ -534,39 +531,29 @@
             const levelInfo = document.getElementById('levelInfo');
             const storeLink = document.getElementById('storeLink');
 
-            // Try to detect if it's a level ID (number) or encoded level data
             if (/^\d+$/.test(levelData)) {
-                // Legacy portal level ID - just show generic message
                 levelInfo.style.display = 'none';
             } else {
-                // Encoded level data from QR code
-                // We could try to decode it to show level name, but for now just indicate it's a shared level
                 levelInfo.textContent = 'Shared Level';
                 levelInfo.style.display = 'block';
             }
 
-            // Detect platform and set appropriate store link
             const userAgent = navigator.userAgent.toLowerCase();
             const isAndroid = userAgent.includes('android');
             const isIOS = /iphone|ipad|ipod/.test(userAgent);
 
             if (isAndroid) {
-                // Try to open the app first, fall back to Play Store
-                // For now, link to Play Store (update this URL when you have one)
                 storeLink.href = 'https://play.google.com/store/apps/details?id=com.nick.aquaducked';
                 storeLink.innerHTML = '<span class="btn-icon">▶️</span> Get on Google Play';
 
-                // Try to open the app directly
                 const appLink = 'aquaducked://level/' + levelData;
                 setTimeout(() => {
                     window.location.href = appLink;
                 }, 100);
             } else if (isIOS) {
-                // Future: Link to App Store
                 storeLink.href = '#';
                 storeLink.innerHTML = '<span class="btn-icon">🍎</span> Coming to iOS';
             } else {
-                // Desktop - show general download info
                 storeLink.href = '#';
                 storeLink.innerHTML = '<span class="btn-icon">📱</span> Available on Mobile';
             }
@@ -574,7 +561,6 @@
             overlay.classList.add('active');
         }
 
-        // Update main download button based on platform
         function updateDownloadButton() {
             const btn = document.getElementById('mainDownloadBtn');
             const userAgent = navigator.userAgent.toLowerCase();
@@ -588,10 +574,8 @@
                 btn.href = '#';
                 btn.innerHTML = '<span class="btn-icon">🍎</span> Coming to iOS';
             }
-            // Desktop keeps default
         }
 
-        // Run on page load
         document.addEventListener('DOMContentLoaded', () => {
             checkForLevelLink();
             updateDownloadButton();
