@@ -325,6 +325,65 @@
             .qr-redirect-card {
                 padding: 30px;
             }
+              .features-showcase {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+  }
+
+  .feature-row {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      margin-bottom: 40px;
+  }
+
+  .feature-row.reverse {
+      flex-direction: row-reverse;
+  }
+
+  .feature-image {
+      flex: 1;
+      max-width: 500px;
+  }
+
+  .feature-image img {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .feature-text {
+      flex: 1;
+  }
+
+  .feature-text h3 {
+      font-size: 1.5rem;
+      color: #ffd700;
+      margin-bottom: 10px;
+  }
+
+  .feature-text p {
+      font-size: 1.1rem;
+      color: #ccd;
+      line-height: 1.6;
+  }
+
+  /* Mobile: stack vertically */
+  @media (max-width: 768px) {
+      .feature-row,
+      .feature-row.reverse {
+          flex-direction: column;
+      }
+
+      .feature-image {
+          max-width: 100%;
+      }
+
+      .feature-text {
+          text-align: center;
+      }
+  }
         }
     </style>
 </head>
@@ -363,26 +422,49 @@
       its towards Mama.
             </p>
 
-            <div class="features">
-      <div class="feature">
-          <div class="feature-icon">🎨</div>
-          <h3>Level Editor</h3>
-          <p>Build your own puzzles with an intuitive editor</p>
+            <!-- Features with screenshots -->
+  <div class="features-showcase">
+      <div class="feature-row">
+          <div class="feature-image">
+              <img src="Editor.png" alt="Level Editor">
+          </div>
+          <div class="feature-text">
+              <h3>🎨 Level Editor</h3>
+              <p>Build your own puzzles with an intuitive drag-and-drop editor. Choose from platforms, slides, hoses,
+  trampolines, fans, and more.</p>
+          </div>
       </div>
-      <div class="feature">
-          <div class="feature-icon">📤</div>
-          <h3>Share Levels</h3>
-          <p>Share via QR code or upload to The Pond</p>
+
+      <div class="feature-row reverse">
+          <div class="feature-image">
+              <img src="Hello_Share.png" alt="Share Levels">
+          </div>
+          <div class="feature-text">
+              <h3>📤 Share Levels</h3>
+              <p>Share your creations with a QR code. Friends can scan and play your level instantly—no account needed.</p>     
+          </div>
       </div>
-      <div class="feature">
-          <div class="feature-icon">🦆</div>
-          <h3>Physics Fun</h3>
-          <p>Realistic water and bouncy physics</p>
+
+      <div class="feature-row">
+          <div class="feature-image">
+              <img src="Physics.png" alt="Physics Fun">
+          </div>
+          <div class="feature-text">
+              <h3>🎈 Physics Fun</h3>
+              <p>Realistic water, bouncy trampolines, floating balloons, and rope swings. Watch your duck splash, bounce,       
+  and float to the goal.</p>
+          </div>
       </div>
-      <div class="feature">
-          <div class="feature-icon">🌊</div>
-          <h3>The Pond</h3>
-          <p>Play thousands of community levels</p>
+
+      <div class="feature-row reverse">
+          <div class="feature-image">
+              <img src="Pond.png" alt="The Pond">
+          </div>
+          <div class="feature-text">
+              <h3>🌊 The Pond</h3>
+              <p>Browse and play community levels from players around the world. Filter by difficulty, search by name, and      
+  favorite the best ones.</p>
+          </div>
       </div>
   </div>
         </section>
